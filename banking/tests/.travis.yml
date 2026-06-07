@@ -1,0 +1,20 @@
+language: cpp
+os: linux
+dist: focal
+
+compiler:
+  - gcc
+  - clang
+
+before_script:
+  - pip install --user cpp-coveralls
+
+script:
+  - cmake -H. -B_build -DCMAKE_BUILD_TYPE=Debug
+  - cmake --build _build
+  - cd _build
+  - ctest --output-on-failure
+  - cd ..
+
+after_success:
+  - coveralls --include banking --gcov-options '\-lp'

@@ -1,0 +1,8 @@
+_build/
+*.gcno
+*.gcda
+*.gcov
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
