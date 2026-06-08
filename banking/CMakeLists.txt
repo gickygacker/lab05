@@ -3,15 +3,14 @@ project(banking)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 add_library(banking STATIC Account.cpp Transaction.cpp)
-set_target_properties(banking PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_include_directories(banking PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+set_target_properties(banking PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
-set(BUILD_GMOCK ON CACHE BOOL "" FORCE)
 set(gtest_disable_pthreads ON CACHE BOOL "" FORCE)
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
 include(FetchContent)
 FetchContent_Declare(
