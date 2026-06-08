@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 add_library(banking STATIC Account.cpp Transaction.cpp)
+set_target_properties(banking PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_include_directories(banking PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
@@ -25,8 +26,6 @@ target_link_libraries(banking_tests PRIVATE banking gtest_main gmock_main)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
   target_compile_options(banking PRIVATE --coverage)
-  target_link_options(banking PRIVATE --coverage)
-  
   target_compile_options(banking_tests PRIVATE --coverage)
   target_link_options(banking_tests PRIVATE --coverage)
 endif()
