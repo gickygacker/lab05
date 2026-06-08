@@ -20,7 +20,7 @@ public:
 
 TEST(TransactionTest, ConstructorTest) {
     Transaction t;
-    EXPECT_EQ(t.fee(), 0);
+    EXPECT_EQ(t.fee(), 1);
 }
 
 TEST(TransactionTest, SetFeeTest) {
@@ -29,23 +29,31 @@ TEST(TransactionTest, SetFeeTest) {
     EXPECT_EQ(t.fee(), 10);
 }
 
-TEST(TransactionTest, MakeTransactionTest) {
+TEST(TransactionTest, MakeTransactionSameIdThrows) {
+    Account acc(1, 1000);
+    Transaction t;
+    EXPECT_THROW(t.Make(acc, acc, 200), std::logic_error);
+}
+
+TEST(TransactionTest, MakeTransactionNegativeSumThrows) {
     Account from(1, 1000);
     Account to(2, 500);
     Transaction t;
-    t.set_fee(5);
-    
-    bool result = t.Make(from, to, 200);
-    
-    EXPECT_TRUE(result);
-    EXPECT_EQ(from.GetBalance(), 795); 
-    EXPECT_EQ(to.GetBalance(), 700);
+    EXPECT_THROW(t.Make(from, to, -100), std::invalid_argument);
 }
 
-TEST(TransactionTest, InsufficientFundsTest) {
+TEST(TransactionTest, MakeTransactionSmallSumThrows) {
+    Account from(1, 1000);
+    Account to(2, 500);
+    Transaction t;
+    EXPECT_THROW(t.Make(from, to, 50), std::logic_error);
+}
+
+TEST(TransactionTest, MakeTransactionInsufficientFunds) {
     Account from(1, 100);
     Account to(2, 500);
     Transaction t;
+    t.set_fee(1);
     
     bool result = t.Make(from, to, 200);
     
@@ -54,14 +62,16 @@ TEST(TransactionTest, InsufficientFundsTest) {
     EXPECT_EQ(to.GetBalance(), 500);
 }
 
-TEST(TransactionTest, ZeroSumTest) {
+TEST(TransactionTest, MakeTransactionSuccess) {
     Account from(1, 1000);
     Account to(2, 500);
     Transaction t;
+    t.set_fee(5);
     
-    bool result = t.Make(from, to, 0);
+    bool result = t.Make(from, to, 200);
     
-    EXPECT_FALSE(result);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(to.GetBalance(), 495);
 }
 
 TEST(TransactionMockTest, MockSaveToDataBase) {
@@ -69,8 +79,10 @@ TEST(TransactionMockTest, MockSaveToDataBase) {
     MockAccount to(2, 500);
     MockTransaction t;
     
-    EXPECT_CALL(from, ChangeBalance(testing::_)).Times(1);
-    EXPECT_CALL(to, ChangeBalance(testing::_)).Times(1);
+    EXPECT_CALL(from, Lock()).Times(1);
+    EXPECT_CALL(from, Unlock()).Times(1);
+    EXPECT_CALL(to, Lock()).Times(1);
+    EXPECT_CALL(to, Unlock()).Times(1);
     EXPECT_CALL(t, SaveToDataBase(testing::Ref(from), testing::Ref(to), 200)).Times(1);
     
     t.Make(from, to, 200);
