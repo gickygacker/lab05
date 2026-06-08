@@ -21,9 +21,10 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
 add_executable(banking_tests tests/test_account.cpp tests/test_transaction.cpp)
-target_link_libraries(banking_tests PRIVATE banking gtest_main gmock_main)
+find_package(Threads REQUIRED)
+target_link_libraries(banking_tests PRIVATE banking gtest_main gmock_main Threads::Threads)
 
-if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   target_compile_options(banking PRIVATE --coverage)
   target_compile_options(banking_tests PRIVATE --coverage)
   target_link_options(banking_tests PRIVATE --coverage)
