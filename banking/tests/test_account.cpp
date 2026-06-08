@@ -15,7 +15,41 @@ public:
 TEST(AccountTest, ConstructorTest) {
     Account acc(1, 1000);
     EXPECT_EQ(acc.id(), 1);
-   …);
+    EXPECT_EQ(acc.GetBalance(), 1000);
+}
+
+TEST(AccountTest, GetBalanceTest) {
+    Account acc(1, 500);
+    EXPECT_EQ(acc.GetBalance(), 500);
+}
+
+TEST(AccountTest, ChangeBalanceTest) {
+    Account acc(1, 1000);
+    acc.ChangeBalance(500);
+    EXPECT_EQ(acc.GetBalance(), 1500);
+    
+    acc.ChangeBalance(-200);
+    EXPECT_EQ(acc.GetBalance(), 1300);
+}
+
+TEST(AccountTest, LockUnlockTest) {
+    Account acc(1, 1000);
+    acc.Lock();
+    acc.ChangeBalance(500);
+    EXPECT_EQ(acc.GetBalance(), 1000);
+    
+    acc.Unlock();
+    acc.ChangeBalance(500);
+    EXPECT_EQ(acc.GetBalance(), 1500);
+}
+
+TEST(AccountTest, IdTest) {
+    Account acc(42, 1000);
+    EXPECT_EQ(acc.id(), 42);
+}
+
+TEST(AccountMockTest, MockGetBalance) {
+    MockAccount mock_acc(1, 1000);
     EXPECT_CALL(mock_acc, GetBalance())
         .WillOnce(testing::Return(2000));
     
