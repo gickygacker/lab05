@@ -23,8 +23,14 @@ TEST(AccountTest, GetBalanceTest) {
     EXPECT_EQ(acc.GetBalance(), 500);
 }
 
-TEST(AccountTest, ChangeBalanceTest) {
+TEST(AccountTest, ChangeBalanceWithoutLockThrows) {
     Account acc(1, 1000);
+    EXPECT_THROW(acc.ChangeBalance(500), std::runtime_error);
+}
+
+TEST(AccountTest, ChangeBalanceWithLock) {
+    Account acc(1, 1000);
+    acc.Lock();
     acc.ChangeBalance(500);
     EXPECT_EQ(acc.GetBalance(), 1500);
     
@@ -35,12 +41,17 @@ TEST(AccountTest, ChangeBalanceTest) {
 TEST(AccountTest, LockUnlockTest) {
     Account acc(1, 1000);
     acc.Lock();
-    acc.ChangeBalance(500);
-    EXPECT_EQ(acc.GetBalance(), 1000);
+    EXPECT_NO_THROW(acc.ChangeBalance(500));
+    EXPECT_EQ(acc.GetBalance(), 1500);
     
     acc.Unlock();
-    acc.ChangeBalance(500);
-    EXPECT_EQ(acc.GetBalance(), 1500);
+    EXPECT_THROW(acc.ChangeBalance(500), std::runtime_error);
+}
+
+TEST(AccountTest, DoubleLockThrows) {
+    Account acc(1, 1000);
+    acc.Lock();
+    EXPECT_THROW(acc.Lock(), std::runtime_error);
 }
 
 TEST(AccountTest, IdTest) {
@@ -59,7 +70,6 @@ TEST(AccountMockTest, MockGetBalance) {
 TEST(AccountMockTest, MockChangeBalance) {
     MockAccount mock_acc(1, 1000);
     EXPECT_CALL(mock_acc, ChangeBalance(500));
-    
     mock_acc.ChangeBalance(500);
 }
 
