@@ -1,23 +1,44 @@
-name: CI
+name: CI CMake
+
 on:
   push:
-    branches: [ master, main ]
+    branches: ["master"]
   pull_request:
-    branches: [ master, main ]
+    branches: ["master"]
+
 jobs:
-  build:
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        compiler: [gcc, clang]
-    runs-on: ${{ matrix.os }}
+  build_and_test:
+    runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
+      - name: get
+        uses: actions/checkout@v4
+
+      - name: configure
+        run: cmake -S tests -B tests/build -DBUILD_TESTS=ON
+        working-directory: .
+
+      - name: build
+        run: cmake --build tests/build --config Debug
+        working-directory: .
+
+      - name: run tests
+        run: ./tests/build/tests
+        working-directory: .
+
+      - name: Generate coverage
+        working-directory: .
+        run: |
+          pip install gcovr
+          gcovr \
+            --root . \
+            --exclude 'tests/.*' \
+            --lcov \
+            -o coverage.info \
+            tests/build
+
+      - name: upload to coveralls
+        uses: coverallsapp/github-action@v2
         with:
-          submodules: recursive 
-      - name: Configure
-        run: cmake -B build -DCMAKE_CXX_COMPILER=${{ matrix.compiler }}
-      - name: Build
-        run: cmake --build build
-      - name: Test
-        run: cd build && ctest --output-on-failure
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: coverage.info
